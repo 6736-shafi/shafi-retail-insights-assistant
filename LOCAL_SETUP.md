@@ -17,13 +17,15 @@ Before you begin, ensure you have the following installed:
 Open your terminal or command prompt and run the following command to clone the repository:
 
 ```bash
-git clone https://github.com/6736-shafi/retail-insights-assistant.git
+git clone https://github.com/6736-shafi/shafi-retail-insights-assistant.git
 cd retail-insights-assistant
 ```
 
+> **IMPORTANT:** All subsequent commands must be run from inside the `retail-insights-assistant` directory.
+
 ### 2. Create a Virtual Environment
 
-It is best practice to use a virtual environment to manage dependencies. Run the following command:
+It is best practice to use a virtual environment to manage dependencies. Run the following command (ensure you are in the `retail-insights-assistant` folder):
 
 **macOS / Linux:**
 ```bash
@@ -92,7 +94,7 @@ Once everything is set up, you can start the application.
 
 ### 1. Start the Streamlit Interface
 
-Run the following command from the root directory:
+Run the following command from the root directory (`retail-insights-assistant`):
 
 ```bash
 streamlit run src/ui/app.py
