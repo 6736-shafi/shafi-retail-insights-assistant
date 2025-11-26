@@ -5,4 +5,4 @@ google-generativeai
 python-dotenv
 langgraph
 langchain-google-genai
-crewai
+crewai[google-genai]
