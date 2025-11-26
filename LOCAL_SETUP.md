@@ -18,14 +18,14 @@ Open your terminal or command prompt and run the following command to clone the 
 
 ```bash
 git clone https://github.com/6736-shafi/shafi-retail-insights-assistant.git
-cd retail-insights-assistant
+cd shafi-retail-insights-assistant
 ```
 
-> **IMPORTANT:** All subsequent commands must be run from inside the `retail-insights-assistant` directory.
+> **IMPORTANT:** All subsequent commands must be run from inside the `shafi-retail-insights-assistant` directory.
 
 ### 2. Create a Virtual Environment
 
-It is best practice to use a virtual environment to manage dependencies. Run the following command (ensure you are in the `retail-insights-assistant` folder):
+It is best practice to use a virtual environment to manage dependencies. Run the following command (ensure you are in the `shafi-retail-insights-assistant` folder):
 
 **macOS / Linux:**
 ```bash
@@ -94,7 +94,7 @@ Once everything is set up, you can start the application.
 
 ### 1. Start the Streamlit Interface
 
-Run the following command from the root directory (`retail-insights-assistant`):
+Run the following command from the root directory (`shafi-retail-insights-assistant`):
 
 ```bash
 streamlit run src/ui/app.py
@@ -113,6 +113,7 @@ The application should automatically open in your default web browser. If not, n
     *   *Example*: "What was the total revenue last month?"
     *   *Example*: "Show me the top selling products."
 3.  **View Insights**: The assistant will process your query and display answers, charts, and insights based on the uploaded data.
+4.  **Visualize Data**: Switch to the **Visualization** tab and click "Generate Plots" to see interactive charts for Sales by Year, Category, and Source.
 
 ## Troubleshooting
 

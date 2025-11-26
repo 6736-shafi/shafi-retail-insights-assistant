@@ -6,6 +6,7 @@ A GenAI-powered assistant for analyzing retail sales data, capable of answering 
 *   **Conversational Q&A**: Ask questions about sales, stock, and pricing in plain English.
 *   **Multi-Agent Backend**: Choose between **Custom**, **LangGraph**, or **CrewAI** frameworks.
 *   **Automated Summarization**: One-click generation of KPI reports and insights.
+*   **Interactive Visualizations**: Built-in charts for Sales by Year, Category, and Source.
 *   **Data Engineering**: Robust pipeline handling multiple CSV sources (Sales, Stock, Pricing).
 
 ## 🛠️ Setup & Execution
