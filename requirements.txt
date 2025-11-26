@@ -1,0 +1,8 @@
+pandas
+duckdb
+streamlit
+google-generativeai
+python-dotenv
+langgraph
+langchain-google-genai
+crewai
