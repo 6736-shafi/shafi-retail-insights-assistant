@@ -78,7 +78,7 @@ if uploaded_files:
                 st.success(f"Loaded data using {framework_choice}!")
 
         # Tabs for different modes
-        tab1, tab2 = st.tabs(["💬 Chat Q&A", "📊 Summarization"])
+        tab1, tab2, tab3 = st.tabs(["💬 Chat Q&A", "📊 Summarization", "📈 Visualization"])
 
         with tab1:
             st.subheader("Ask questions about your data")
@@ -112,6 +112,30 @@ if uploaded_files:
                 with st.spinner("Generating summary..."):
                     response = st.session_state.orchestrator.generate_summary()
                     st.markdown(response)
+
+        with tab3:
+            st.subheader("Visual Analytics")
+            if st.button("Generate Plots"):
+                with st.spinner("Fetching data for visualization..."):
+                    viz_data = st.session_state.orchestrator.get_visualization_data()
+                    
+                    if viz_data:
+                        # 1. Sales by Year (Line Chart)
+                        if "Sales by Year" in viz_data:
+                            st.markdown("### 📅 Sales Trend by Year")
+                            st.line_chart(viz_data["Sales by Year"])
+                        
+                        # 2. Top Categories (Bar Chart)
+                        if "Top 10 Categories" in viz_data:
+                            st.markdown("### 🏆 Top 10 Categories")
+                            st.bar_chart(viz_data["Top 10 Categories"])
+                            
+                        # 3. Sales by Source (Bar Chart)
+                        if "Sales by Source" in viz_data:
+                            st.markdown("### 🛒 Sales by Source")
+                            st.bar_chart(viz_data["Sales by Source"])
+                    else:
+                        st.warning("No data available for visualization.")
 
     except Exception as e:
         st.error(f"Error initializing system: {e}")

@@ -196,3 +196,30 @@ class LangGraphAgent:
         Format the output with clear headings and bullet points.
         """
         return self.llm.invoke(prompt).content
+
+    def get_visualization_data(self):
+        """Fetches data specifically for visualization."""
+        queries = {
+            "Sales by Year": "SELECT Year, SUM(Amount) as Total_Sales FROM sales_data GROUP BY Year ORDER BY Year",
+            "Top 10 Categories": "SELECT Category, SUM(Amount) as Total_Sales FROM sales_data GROUP BY Category ORDER BY Total_Sales DESC LIMIT 10",
+            "Sales by Source": "SELECT Source, SUM(Amount) as Total_Sales FROM sales_data GROUP BY Source"
+        }
+        
+        results = {}
+        for title, sql in queries.items():
+            try:
+                # Use the data loader directly
+                df = self.data_loader.query(sql)
+                if isinstance(df, pd.DataFrame) and not df.empty:
+                    # Set index for better plotting in Streamlit
+                    if "Year" in df.columns:
+                        df.set_index("Year", inplace=True)
+                    elif "Category" in df.columns:
+                        df.set_index("Category", inplace=True)
+                    elif "Source" in df.columns:
+                        df.set_index("Source", inplace=True)
+                    results[title] = df
+            except Exception as e:
+                print(f"Error fetching visualization data for {title}: {e}")
+        
+        return results
