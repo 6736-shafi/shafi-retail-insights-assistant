@@ -87,8 +87,31 @@ The agent maintains a state object containing:
     *   If `retries >= 3`: Moves to `Generate Response` to inform the user of the failure.
 
 
+## 🤖 CrewAI Agent Workflow
+
+The **CrewAI** implementation (`src/backend/crewai_agent.py`) orchestrates a team of specialized role-playing agents to solve the task sequentially.
+
+### The Crew
+1.  **Query Resolution Specialist**:
+    *   *Goal*: Translate natural language questions into syntactically correct DuckDB SQL.
+    *   *Role*: Expert in SQL dialects. Does not execute queries.
+2.  **Database Administrator**:
+    *   *Goal*: Execute the provided SQL query.
+    *   *Tools*: `Execute SQL` (Custom Tool).
+3.  **Data Validator**:
+    *   *Goal*: Validate that the retrieved data is not empty and contains meaningful results.
+4.  **Retail Data Analyst**:
+    *   *Goal*: Synthesize the validated data into a clear, human-readable answer.
+
+### Process (Sequential)
+The agents work in a strict linear chain:
+1.  **Task 1 (Resolve)**: User Query -> SQL.
+2.  **Task 2 (Extract)**: SQL -> Raw Data (executed by DBA).
+3.  **Task 3 (Validate)**: Raw Data -> Validated Data (or error flag).
+4.  **Task 4 (Respond)**: Validated Data -> Final Answer.
+
+
 ## 📂 Project Structure
 *   `src/backend/`: Contains the agent implementations (Custom, LangGraph, CrewAI).
 *   `src/ui/`: Streamlit application code.
-*   `data/`: Directory for CSV datasets.
 *   `architecture_presentation.md`: Detailed system design and scalability strategy.
