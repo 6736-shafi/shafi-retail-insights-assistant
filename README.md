@@ -62,6 +62,31 @@ The application will open at `http://localhost:8501`.
 4.  **Automated Evaluation Pipeline**:
     *   *Future*: Integrate LangSmith/DeepEval to run regression tests on a "Golden Dataset" of Q&A pairs on every commit.
 
+## 🧠 LangGraph Agent Workflow
+
+The **LangGraph** implementation (`src/backend/langgraph_agent.py`) uses a state machine to handle complex queries with self-correction.
+
+### State Schema
+The agent maintains a state object containing:
+*   `user_query`: The original question.
+*   `sql_query`: Generated SQL.
+*   `data`: Retrieved results.
+*   `error`: Any error messages.
+*   `retries`: Counter for failed attempts.
+
+### Graph Nodes
+1.  **Resolve Query**: Converts natural language to DuckDB SQL. If an error exists in the state, it enters "Fix Mode" to correct the previous SQL.
+2.  **Extract Data**: Executes the SQL against the database. Captures any exceptions.
+3.  **Validate Data**: Checks if the returned data is empty.
+4.  **Generate Response**: Synthesizes the final answer using the data and the original query.
+
+### Control Flow
+*   **Success Path**: Resolve -> Extract -> Validate -> Generate Response -> End.
+*   **Retry Loop**: If `Extract Data` fails, the workflow checks the retry count.
+    *   If `retries < 3`: Loops back to `Resolve Query` with the error message for self-correction.
+    *   If `retries >= 3`: Moves to `Generate Response` to inform the user of the failure.
+
+
 ## 📂 Project Structure
 *   `src/backend/`: Contains the agent implementations (Custom, LangGraph, CrewAI).
 *   `src/ui/`: Streamlit application code.
