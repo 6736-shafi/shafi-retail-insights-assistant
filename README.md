@@ -1,117 +1,122 @@
-# Retail Insights Assistant
+# Local Setup Guide for Retail Insights Assistant
 
-A GenAI-powered assistant for analyzing retail sales data, capable of answering ad-hoc business questions and generating executive summaries.
+This guide provides step-by-step instructions to set up and run the Retail Insights Assistant locally on your machine.
 
-## 🚀 Features
-*   **Conversational Q&A**: Ask questions about sales, stock, and pricing in plain English.
-*   **Multi-Agent Backend**: Choose between **Custom**, **LangGraph**, or **CrewAI** frameworks.
-*   **Automated Summarization**: One-click generation of KPI reports and insights.
-*   **Interactive Visualizations**: Built-in charts for Sales by Year, Category, and Source.
-*   **Data Engineering**: Robust pipeline handling multiple CSV sources (Sales, Stock, Pricing).
+## Prerequisites
 
-## 🛠️ Setup & Execution
+Before you begin, ensure you have the following installed:
 
-### Prerequisites
-*   Python 3.10+
-*   Google Cloud API Key (Gemini)
+*   **Python 3.10 or higher**: [Download Python](https://www.python.org/downloads/)
+*   **Git**: [Download Git](https://git-scm.com/downloads)
+*   **VS Code (Optional)**: Recommended for code editing.
 
-### Installation
-1.  **Clone/Unzip** the repository.
-2.  **Install Dependencies**:
+## Installation
+
+### 1. Clone the Repository
+
+Open your terminal or command prompt and run the following command to clone the repository:
+
+```bash
+git clone https://github.com/6736-shafi/shafi-retail-insights-assistant.git
+cd shafi-retail-insights-assistant
+```
+
+> **IMPORTANT:** All subsequent commands must be run from inside the `shafi-retail-insights-assistant` directory.
+
+### 2. Create a Virtual Environment
+
+It is best practice to use a virtual environment to manage dependencies. Run the following command (ensure you are in the `shafi-retail-insights-assistant` folder):
+
+**macOS / Linux:**
+```bash
+python3 -m venv venv
+```
+
+**Windows:**
+```bash
+python -m venv venv
+```
+
+### 3. Activate the Virtual Environment
+
+Activate the virtual environment to isolate your project dependencies:
+
+**macOS / Linux:**
+```bash
+source venv/bin/activate
+```
+
+**Windows:**
+```bash
+.\venv\Scripts\activate
+```
+
+_You should see `(venv)` appear at the beginning of your terminal line, indicating the virtual environment is active._
+
+### 4. Install Dependencies
+
+Install the required Python packages using `pip`:
+
+```bash
+pip install -r requirements.txt
+```
+
+## Configuration
+
+### 1. Set up Environment Variables
+
+The application requires API keys to function.
+
+1.  Create a new file named `.env` in the root directory of the project.
+2.  You can copy the template from `.env.example`:
+
+    **macOS / Linux:**
     ```bash
-    pip install -r requirements.txt
+    cp .env.example .env
     ```
-3.  **Configure Environment**:
-    *   Create a `.env` file (optional) or export your key:
-        ```bash
-        export GOOGLE_API_KEY="your_api_key_here"
-        ```
 
-### Running the App
+    **Windows:**
+    ```bash
+    copy .env.example .env
+    ```
+
+3.  Open the `.env` file and add your Google Gemini API Key:
+
+    ```env
+    GOOGLE_API_KEY=your_actual_api_key_here
+    ```
+
+    *   If you don't have a key, get one from [Google AI Studio](https://aistudio.google.com/).
+
+## Running the Application
+
+Once everything is set up, you can start the application.
+
+### 1. Start the Streamlit Interface
+
+Run the following command from the root directory (`shafi-retail-insights-assistant`):
+
 ```bash
 streamlit run src/ui/app.py
 ```
-The application will open at `http://localhost:8501`.
 
-## 📝 Technical Notes
+### 2. Access the App
 
-### Assumptions
-1.  **Data Schema**: The system assumes the input CSVs match the schema of the provided sample data (Amazon Sales, International Sales, etc.).
-2.  **Currency**: All monetary values are assumed to be in INR unless specified otherwise.
-3.  **Single Tenant**: The current deployment assumes a single user session for simplicity.
+The application should automatically open in your default web browser. If not, navigate to the URL shown in the terminal, usually:
 
-### Limitations
-1.  **Context Window**: Extremely large queries or massive intermediate SQL results might hit the LLM's token limit (though Gemini Flash has a large window).
-2.  **Statelessness**: While the UI maintains chat history, the backend agents treat each query independently (except for the LangGraph implementation which has state).
-3.  **Math Accuracy**: Complex multi-step calculations are offloaded to SQL (DuckDB) to ensure accuracy, as LLMs can struggle with direct arithmetic.
+`http://localhost:8501`
 
-### Future Roadmap (Enterprise Scale)
+### 3. Using the App
 
-1.  **Hybrid RAG for Schema Management**:
-    *   *Current*: Full schema injection.
-    *   *Future*: Use Vector DB (Pinecone) to index table metadata. Retrieve only top-5 relevant tables per query to handle 1000+ tables.
+1.  **Upload Data**: On the sidebar, look for the file upload section. You can upload CSV files containing your retail data (e.g., Sales Reports, Inventory).
+2.  **Ask Questions**: In the main chat interface, type your questions about the data.
+    *   *Example*: "What was the total revenue last month?"
+    *   *Example*: "Show me the top selling products."
+3.  **View Insights**: The assistant will process your query and display answers, charts, and insights based on the uploaded data.
+4.  **Visualize Data**: Switch to the **Visualization** tab and click "Generate Plots" to see interactive charts for Sales by Year, Category, and Source.
 
-2.  **Intelligent Caching Layer**:
-    *   *Current*: No caching.
-    *   *Future*: Implement Redis to cache frequent SQL results (e.g., "Total Revenue"), reducing API costs and latency by 90%.
+## Troubleshooting
 
-3.  **Security & Governance**:
-    *   *Current*: Single-tenant.
-    *   *Future*: Integrate OAuth2 and Row-Level Security (RLS) to restrict data access by region/role.
-
-4.  **Automated Evaluation Pipeline**:
-    *   *Future*: Integrate LangSmith/DeepEval to run regression tests on a "Golden Dataset" of Q&A pairs on every commit.
-
-## 🧠 LangGraph Agent Workflow
-
-The **LangGraph** implementation (`src/backend/langgraph_agent.py`) uses a state machine to handle complex queries with self-correction.
-
-### State Schema
-The agent maintains a state object containing:
-*   `user_query`: The original question.
-*   `sql_query`: Generated SQL.
-*   `data`: Retrieved results.
-*   `error`: Any error messages.
-*   `retries`: Counter for failed attempts.
-
-### Graph Nodes
-1.  **Resolve Query**: Converts natural language to DuckDB SQL. If an error exists in the state, it enters "Fix Mode" to correct the previous SQL.
-2.  **Extract Data**: Executes the SQL against the database. Captures any exceptions.
-3.  **Validate Data**: Checks if the returned data is empty.
-4.  **Generate Response**: Synthesizes the final answer using the data and the original query.
-
-### Control Flow
-*   **Success Path**: Resolve -> Extract -> Validate -> Generate Response -> End.
-*   **Retry Loop**: If `Extract Data` fails, the workflow checks the retry count.
-    *   If `retries < 3`: Loops back to `Resolve Query` with the error message for self-correction.
-    *   If `retries >= 3`: Moves to `Generate Response` to inform the user of the failure.
-
-
-## 🤖 CrewAI Agent Workflow
-
-The **CrewAI** implementation (`src/backend/crewai_agent.py`) orchestrates a team of specialized role-playing agents to solve the task sequentially.
-
-### The Crew
-1.  **Query Resolution Specialist**:
-    *   *Goal*: Translate natural language questions into syntactically correct DuckDB SQL.
-    *   *Role*: Expert in SQL dialects. Does not execute queries.
-2.  **Database Administrator**:
-    *   *Goal*: Execute the provided SQL query.
-    *   *Tools*: `Execute SQL` (Custom Tool).
-3.  **Data Validator**:
-    *   *Goal*: Validate that the retrieved data is not empty and contains meaningful results.
-4.  **Retail Data Analyst**:
-    *   *Goal*: Synthesize the validated data into a clear, human-readable answer.
-
-### Process (Sequential)
-The agents work in a strict linear chain:
-1.  **Task 1 (Resolve)**: User Query -> SQL.
-2.  **Task 2 (Extract)**: SQL -> Raw Data (executed by DBA).
-3.  **Task 3 (Validate)**: Raw Data -> Validated Data (or error flag).
-4.  **Task 4 (Respond)**: Validated Data -> Final Answer.
-
-
-## 📂 Project Structure
-*   `src/backend/`: Contains the agent implementations (Custom, LangGraph, CrewAI).
-*   `src/ui/`: Streamlit application code.
-*   `architecture_presentation.md`: Detailed system design and scalability strategy.
+*   **"Module not found" error**: Ensure your virtual environment is activated (`(venv)` is visible) and you have run `pip install -r requirements.txt`.
+*   **API Key errors**: Double-check that your `.env` file exists and contains the correct `GOOGLE_API_KEY`.
+*   **Port already in use**: If `localhost:8501` is taken, Streamlit will automatically try the next available port (e.g., 8502). Check the terminal output for the correct URL.
