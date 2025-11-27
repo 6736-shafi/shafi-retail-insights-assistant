@@ -28,33 +28,49 @@ fi
 REGION=${REGION:-us-central1}
 
 APP_NAME="retail-assistant"
+REPO_NAME="retail-repo"
 
 echo ""
 echo "🚀 Starting Deployment..."
 echo "Project ID: $PROJECT_ID"
 echo "Region: $REGION"
 echo "App Name: $APP_NAME"
+echo "Repository: $REPO_NAME"
 echo "========================================================"
 
 # 0. Set Project
 gcloud config set project $PROJECT_ID
 
 # 1. Enable Services
-echo "Enabling Cloud Run and Container Registry APIs..."
-gcloud services enable run.googleapis.com containerregistry.googleapis.com
+echo "Enabling Cloud Run and Artifact Registry APIs..."
+gcloud services enable run.googleapis.com artifactregistry.googleapis.com
 
-# 2. Build and Push Image
+# 2. Create Artifact Registry Repository (if not exists)
+echo "Checking/Creating Artifact Registry Repository..."
+if ! gcloud artifacts repositories describe $REPO_NAME --location=$REGION --project=$PROJECT_ID > /dev/null 2>&1; then
+    gcloud artifacts repositories create $REPO_NAME \
+        --repository-format=docker \
+        --location=$REGION \
+        --description="Docker repository for Retail Insights Assistant"
+    echo "✅ Repository created."
+else
+    echo "✅ Repository already exists."
+fi
+
+# 3. Build and Push Image
 echo "Configuring Docker..."
-gcloud auth configure-docker --quiet
+gcloud auth configure-docker $REGION-docker.pkg.dev --quiet
+
+IMAGE_URI="$REGION-docker.pkg.dev/$PROJECT_ID/$REPO_NAME/$APP_NAME:v1"
 
 echo "Building Docker Image..."
-# Build for linux/amd64
-docker build --platform linux/amd64 -t gcr.io/$PROJECT_ID/$APP_NAME:v1 .
+# Build for linux/amd64 (Cloud Run requirement)
+docker build --platform linux/amd64 -t $IMAGE_URI .
 
-echo "Pushing Docker Image to GCR..."
-docker push gcr.io/$PROJECT_ID/$APP_NAME:v1
+echo "Pushing Docker Image to Artifact Registry..."
+docker push $IMAGE_URI
 
-# 3. Deploy to Cloud Run
+# 4. Deploy to Cloud Run
 echo "Deploying to Cloud Run..."
 
 # Get API Key
@@ -71,12 +87,14 @@ if [ -z "$API_KEY" ]; then
 fi
 
 gcloud run deploy $APP_NAME \
-    --image gcr.io/$PROJECT_ID/$APP_NAME:v1 \
+    --image $IMAGE_URI \
     --platform managed \
     --region $REGION \
     --allow-unauthenticated \
     --set-env-vars GOOGLE_API_KEY="$API_KEY" \
-    --port 8501
+    --port 8501 \
+    --memory 2Gi \
+    --cpu 1
 
 echo "========================================================"
 echo "✅ Deployment Complete!"
