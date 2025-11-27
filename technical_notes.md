@@ -1,45 +1,6 @@
 # Retail Insights Assistant - Technical Documentation
 
-## 1. Setup & Execution Guide
-
-### Prerequisites
-*   **Operating System**: Windows, macOS, or Linux.
-*   **Python**: Version 3.10 or higher.
-*   **API Key**: A valid Google Cloud API Key with access to `gemini-flash-latest` or `gemini-1.5-flash`.
-
-### Installation Steps
-1.  **Unzip the Project**: Extract the provided `POC.zip` file to a folder.
-2.  **Open Terminal**: Navigate to the project folder.
-    ```bash
-    cd POC
-    ```
-3.  **Create Virtual Environment** (Recommended):
-    ```bash
-    python -m venv venv
-    source venv/bin/activate  # On Windows: venv\Scripts\activate
-    ```
-4.  **Install Dependencies**:
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-### Configuration
-1.  Create a file named `.env` in the root directory.
-2.  Add your API key:
-    ```
-    GOOGLE_API_KEY=your_actual_api_key_here
-    ```
-
-### Running the Application
-Execute the following command to start the Streamlit UI:
-```bash
-streamlit run src/ui/app.py
-```
-The application will launch automatically in your default web browser at `http://localhost:8501`.
-
----
-
-## 2. Assumptions
+## 1. Assumptions
 
 *   **Data Consistency**: The system assumes that the CSV files in the `data/` directory (`Amazon Sale Report.csv`, etc.) maintain the same column names and data types as the sample dataset provided. Drastic schema changes would require updating the `DataLoader`.
 *   **Currency**: All monetary values in the source data are assumed to be in **INR (Indian Rupee)** unless a specific currency column exists and is handled.
@@ -50,7 +11,7 @@ The application will launch automatically in your default web browser at `http:/
 
 ---
 
-## 3. Limitations
+## 2. Limitations
 
 *   **Context Window**: While Gemini Flash has a large context window, extremely complex queries requiring the retrieval of thousands of rows might be truncated or exceed token limits. The current "Text-to-SQL" approach mitigates this by aggregating data *before* sending it to the LLM, but raw data inspection is limited.
 *   **Statelessness (Custom Agent)**: The "Custom" and "CrewAI" agent implementations are largely stateless per query. They do not "remember" the result of the previous query for follow-up questions (e.g., "Drill down into that") unless explicitly passed in the conversation history (which is partially implemented in the UI but limited in the backend logic).
@@ -61,7 +22,7 @@ The application will launch automatically in your default web browser at `http:/
 
 ---
 
-## 4. Possible Improvements (Scalability & Features)
+## 3. Possible Improvements (Scalability & Features)
 
 ### A. RAG & Vector Search (For 100GB+ Scale)
 *   **Problem**: As the number of tables grows (e.g., 1000+ tables), passing the entire schema to the LLM becomes impossible.
