@@ -10,6 +10,11 @@ Before you begin, ensure you have the following installed:
 *   **Git**: [Download Git](https://git-scm.com/downloads)
 *   **VS Code (Optional)**: Recommended for code editing.
 
+## 🎥 Demo Video
+
+Watch the application in action:
+[**View Demo Video**](https://drive.google.com/file/d/1ux_-mHwtYQsaWyMEeUM1bcbIKzDh63wC/view)
+
 ## Installation
 
 ### 1. Clone the Repository
